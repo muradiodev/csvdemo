@@ -1,4 +1,63 @@
 package com.csvtask.demo.service.impl;
 
-public class FileUploadingServiceImpl {
+import com.csvtask.demo.config.ApplicationConfig;
+import com.csvtask.demo.repository.FileUploadRepository;
+import com.csvtask.demo.service.FileUploadingService;
+import com.csvtask.demo.utils.FileStorageUtils;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.enums.CSVReaderNullFieldIndicator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class FileUploadingServiceImpl implements FileUploadingService {
+
+    private final FileStorageUtils fileStorageUtils;
+
+    private final ApplicationConfig config;
+
+    private final FileUploadRepository fileUploadRepository;
+
+
+    @Override
+    public String fileUploading(MultipartFile file) {
+
+        Pair<Boolean, String> storedPair = fileStorageUtils.storeFile(file);
+
+        if (storedPair.getFirst()) {
+            // need to read the csv file and then convert in to the entity (PlaFeed)
+
+            // need to pass the director along with fileName
+            try (Reader reader = new FileReader(config.getUploadDir() + File.separator + storedPair.getSecond())) {
+                CsvToBean<PlaFeed> csvToBean = new CsvToBeanBuilder<PlaFeed>(reader)
+                        .withType(PlaFeed.class)
+                        .withIgnoreLeadingWhiteSpace(true)
+                        .withFieldAsNull(CSVReaderNullFieldIndicator.BOTH)
+                        .build();
+
+                List<PlaFeed> plafeed = csvToBean.parse();
+                //finally we get the entity object and now  we need to store in our database i order to do this we need to create
+                //repositoty
+                for (PlaFeed plaFeed1 : plafeed) {
+                    this.fileUploadRepository.save(plaFeed1);
+
+                }
+
+                //lets check it
+
+            } catch (Exception e) {
+                return "error occured while reading and writing the file";
+            }
+        }
+        return null;
+    }
 }
