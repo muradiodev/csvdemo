@@ -1,6 +1,7 @@
 package com.csvtask.demo.service.impl;
 
 import com.csvtask.demo.config.ApplicationConfig;
+import com.csvtask.demo.entities.Product;
 import com.csvtask.demo.repository.FileUploadRepository;
 import com.csvtask.demo.service.FileUploadingService;
 import com.csvtask.demo.utils.FileStorageUtils;
@@ -34,26 +35,19 @@ public class FileUploadingServiceImpl implements FileUploadingService {
         Pair<Boolean, String> storedPair = fileStorageUtils.storeFile(file);
 
         if (storedPair.getFirst()) {
-            // need to read the csv file and then convert in to the entity (PlaFeed)
-
-            // need to pass the director along with fileName
             try (Reader reader = new FileReader(config.getUploadDir() + File.separator + storedPair.getSecond())) {
-                CsvToBean<PlaFeed> csvToBean = new CsvToBeanBuilder<PlaFeed>(reader)
-                        .withType(PlaFeed.class)
+                CsvToBean<Product> csvToBean = new CsvToBeanBuilder<Product>(reader)
+                        .withType(Product.class)
                         .withIgnoreLeadingWhiteSpace(true)
                         .withFieldAsNull(CSVReaderNullFieldIndicator.BOTH)
                         .build();
 
-                List<PlaFeed> plafeed = csvToBean.parse();
-                //finally we get the entity object and now  we need to store in our database i order to do this we need to create
-                //repositoty
-                for (PlaFeed plaFeed1 : plafeed) {
-                    this.fileUploadRepository.save(plaFeed1);
+                List<Product> prod_csv = csvToBean.parse();
+
+                for (Product prod : prod_csv) {
+                    this.fileUploadRepository.save(prod);
 
                 }
-
-                //lets check it
-
             } catch (Exception e) {
                 return "error occured while reading and writing the file";
             }

@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface ProductService {
 
-    List<Product> getPlaFeedList(Map<String, Object> map);
+    List<Product> getProductList(Map<String, Object> map);
 
     Product getProductByCode(String code);
 
