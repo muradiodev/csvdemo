@@ -19,7 +19,7 @@ public class Product {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    private Long id;
+    private String id;
 
     @CsvBindByName(column = "source")
     private String source;
