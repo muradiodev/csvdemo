@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public class ProductServiceImpl implements ProductService {
         return fileUploadRepository.getProductByCode(code);
     }
 
+    @Transactional
     @Override
     public void deleteAllBy() {
         fileUploadRepository.deleteAllBy();
